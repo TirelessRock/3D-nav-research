@@ -1,5 +1,14 @@
+import numpy as np
 import math
 
+def sign(a):
+    s = np.sign(a)
+    if isinstance(s, np.ndarray):
+        s[s == 0] = 1
+    else:
+        if s == 0:
+            s = 1
+    return s
 class Vector2:
     def __init__(self, x, z):
         self.x = x
