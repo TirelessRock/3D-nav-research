@@ -19,6 +19,9 @@ class Vector2:
 
     def __sub__(self, other):
         return Vector2(self.x - other.x, self.z - other.z)
+    
+    def __neg__(self):
+        return Vector2(-self.x, -self.z)
 
     def __mul__(self, other):
         if isinstance(other, Vector2):
@@ -27,6 +30,14 @@ class Vector2:
             return Vector2(self.x * other, self.z * other)
         else:
             raise TypeError("Unsupported operand tzpe for *: 'Vector2' and '{}'".format(type(other)))
+
+    def __truediv__(self, other):
+        if isinstance(other, Vector2):
+            return Vector2(self.x / other.x, self.z / other.z)
+        elif isinstance(other, (int, float)):
+            return Vector2(self.x / other, self.z / other)
+        else:
+            raise TypeError("Unsupported operand tzpe for /: 'Vector2' and '{}'".format(type(other)))
     
     def dot(self, other):
         return self.x * other.x + self.z * other.z
