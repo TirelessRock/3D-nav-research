@@ -21,8 +21,9 @@ def rotate_towards_vector(origin: Vector2, dest: Vector2, angle: float) -> Vecto
 
 class MoveSet(Enum):
     FREE = 0
-    ROTATE = 1
-    DAMP = 2
+    CIRCLE = 1
+    ROTATE = 2
+    DAMP = 3
 
 class Ship:
     def __init__(self):
@@ -40,6 +41,8 @@ class Ship:
 
         self.omega = 0
         self.omega_max = 0.9
+        self.eps = 0
+
         self.handleability = 4
         self.max_tilt = 0.4
 
@@ -62,6 +65,8 @@ class Ship:
 
         s.omega = self.omega
         s.omega_max = self.omega_max
+        s.eps = self.eps
+
         s.handleability = self.handleability
         s.max_tilt = self.max_tilt
 
@@ -75,7 +80,7 @@ class Ship:
         self.next_wp = nwp
     
     def get_theta(self):
-        return (self.next_wp - self.pos).angle_to(self.direction)
+        return self.direction.angle_to(self.next_wp - self.pos)
 
     def to_local(self, target):
         target_rel = target - self.pos
@@ -115,7 +120,7 @@ class Ship:
         pass
 
     # assuming moveset is FREE or <tilt> and <speed> were adjusted beforehand
-    def move(self, delta: float):
+    def move(self, delta: float, verbose=False):
         self.speed = clamp(self.speed, 0, self.maxspeed)
 
         delta_angles = self.apply_tilt_with_boundaries(delta, self.delta_controlled)
@@ -123,9 +128,38 @@ class Ship:
 
         movement_tilt = self.get_speed_tilt(self.tilt)
         movement_tilt *= delta
+        if verbose:
+            # print('desired rotation', self.delta_controlled)
+            # print('bounded rotation', delta_angles)
+            print('rotate by', movement_tilt)
+            print(
+                '%.2e, %.2e' % (
+                    -Vector2(0, 1).angle_to(self.direction),
+                    -Vector2(0, 1).angle_to(self.direction) + Vector2(0, 1).angle_to(self.movement_direction)
+                ),
+                self.tilt
+            )
+
         self.delta_controlled = 0.0
         self.rotate_movement(movement_tilt)
         self.update_orientation()
 
         self.pos += self.movement_direction * self.speed * delta
         return self.pos, self.get_theta()
+    
+    def move_smart(self, delta: float, moveset: MoveSet, verbose=False):
+        if verbose:
+            print('\n', moveset, self.eps)
+
+        if moveset == MoveSet.FREE:
+            self.delta_controlled = 0
+        elif moveset == MoveSet.CIRCLE:
+            self.delta_controlled = 0
+            self.tilt = Vector2(self.omega / self.angular_mobility, 0)
+            self.direction = self.movement_direction.rotated(self.omega / self.angular_mobility)
+        elif moveset == MoveSet.ROTATE:
+            self.delta_controlled = self.eps
+        elif moveset == MoveSet.DAMP:
+            pass
+
+        return self.move(delta, verbose)

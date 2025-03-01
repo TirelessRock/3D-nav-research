@@ -48,8 +48,8 @@ class Vector2:
         return self.x * other.z - self.z * other.x
 
     def rotated(self, angle: 'Vector2') -> 'Vector2':
-        cos_theta = math.cos(angle)
-        sin_theta = math.sin(angle)
+        cos_theta = math.cos(-angle)
+        sin_theta = math.sin(-angle)
         new_x = self.x * cos_theta - self.z * sin_theta
         new_z = self.x * sin_theta + self.z * cos_theta
         return Vector2(new_x, new_z)
@@ -73,7 +73,7 @@ class Vector2:
             raise ValueError("Cannot calculate angle with zero-length vector")
         dot = self.dot(other)
         det = self.det(other)
-        angle = math.atan2(det, dot)  # Returns angle in radians from -pi to pi
+        angle = -math.atan2(det, dot)  # Returns angle in radians from -pi to pi
         return angle
 
 import math
