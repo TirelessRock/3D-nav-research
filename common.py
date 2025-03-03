@@ -130,12 +130,12 @@ class Ship:
         movement_tilt *= delta
         if verbose:
             # print('desired rotation', self.delta_controlled)
-            # print('bounded rotation', delta_angles)
+            print('bounded rotation', delta_angles)
             print('rotate by', movement_tilt)
             print(
                 '%.2e, %.2e' % (
-                    -Vector2(0, 1).angle_to(self.direction),
-                    -Vector2(0, 1).angle_to(self.direction) + Vector2(0, 1).angle_to(self.movement_direction)
+                    Vector2(0, 1).angle_to(self.direction),
+                    self.movement_direction.angle_to(self.direction)
                 ),
                 self.tilt
             )
