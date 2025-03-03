@@ -1,5 +1,3 @@
-import numpy as np
-import math
 from geom import sign, Vector2, Vector3
 
 from math import sqrt, atan2, cos, sin
@@ -120,7 +118,7 @@ class Ship:
         pass
 
     # assuming moveset is FREE or <tilt> and <speed> were adjusted beforehand
-    def move(self, delta: float, verbose=False):
+    def move(self, delta: float, verbose=False, verboselvl=0):
         self.speed = clamp(self.speed, 0, self.maxspeed)
 
         delta_angles = self.apply_tilt_with_boundaries(delta, self.delta_controlled)
@@ -129,16 +127,19 @@ class Ship:
         movement_tilt = self.get_speed_tilt(self.tilt)
         movement_tilt *= delta
         if verbose:
-            # print('desired rotation', self.delta_controlled)
-            print('bounded rotation', delta_angles)
-            print('rotate by', movement_tilt)
-            print(
-                '%.2e, %.2e' % (
-                    Vector2(0, 1).angle_to(self.direction),
-                    self.movement_direction.angle_to(self.direction)
-                ),
-                self.tilt
-            )
+            if verboselvl >= 2:
+                # print('desired rotation', self.delta_controlled)
+                print('bounded rotation', delta_angles)
+                print('rotate by', movement_tilt)
+                print(
+                    '%.2e, %.2e' % (
+                        Vector2(0, 1).angle_to(self.direction),
+                        self.movement_direction.angle_to(self.direction)
+                    ),
+                    self.tilt
+                )
+            if verboselvl >= 1:
+                print(f"p: {self.pos:.3f}, tilt: {self.tilt:.3f}")
 
         self.delta_controlled = 0.0
         self.rotate_movement(movement_tilt)
@@ -147,8 +148,8 @@ class Ship:
         self.pos += self.movement_direction * self.speed * delta
         return self.pos, self.get_theta()
     
-    def move_smart(self, delta: float, moveset: MoveSet, verbose=False):
-        if verbose:
+    def move_smart(self, delta: float, moveset: MoveSet, verbose=False, verboselvl=0):
+        if verbose and verboselvl >= 2:
             print('\n', moveset, self.eps)
 
         if moveset == MoveSet.FREE:
@@ -158,8 +159,8 @@ class Ship:
             self.tilt = Vector2(self.omega / self.angular_mobility, 0)
             self.direction = self.movement_direction.rotated(self.omega / self.angular_mobility)
         elif moveset == MoveSet.ROTATE:
-            self.delta_controlled = self.eps
+            self.delta_controlled = self.eps / self.angular_mobility
         elif moveset == MoveSet.DAMP:
             pass
 
-        return self.move(delta, verbose)
+        return self.move(delta, verbose, verboselvl)

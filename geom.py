@@ -47,7 +47,7 @@ class Vector2:
     def det(self, other: 'Vector2') -> float:
         return self.x * other.z - self.z * other.x
 
-    def rotated(self, angle: 'Vector2') -> 'Vector2':
+    def rotated(self, angle: float) -> 'Vector2':
         cos_theta = math.cos(-angle)
         sin_theta = math.sin(-angle)
         new_x = self.x * cos_theta - self.z * sin_theta
@@ -65,6 +65,9 @@ class Vector2:
 
     def __repr__(self) -> str:
         return f"({self.x}, {self.z})"
+
+    def __format__(self, format_spec: str) -> str:
+        return f"({self.x:{format_spec}}, {self.z:{format_spec}})"
     
     def angle_to(self, other: 'Vector2') -> float:
         len_self = self.length()
